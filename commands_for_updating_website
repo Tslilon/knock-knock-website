@@ -1,0 +1,15 @@
+To download the latest version of the website, run the following command:
+
+aws s3 sync s3://knock-knock.es /Users/tslil/Library/CloudStorage/Dropbox/code/knock-knock-website --region eu-central-1
+
+To serve the website locally, run the following command:
+
+http-server
+
+To preview the changes that will be made in S3 before uploading, run:
+
+aws s3 sync /Users/tslil/Library/CloudStorage/Dropbox/code/knock-knock-website s3://knock-knock.es --region eu-central-1 --dryrun
+
+To upload the latest version of the website, run the following command:
+
+aws s3 sync /Users/tslil/Library/CloudStorage/Dropbox/code/knock-knock-website s3://knock-knock.es --region eu-central-1
