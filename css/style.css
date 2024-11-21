@@ -4592,12 +4592,19 @@ customs
 /* Estilos para el botón del footer  en estado de éxito y error */
 .mil-button.success {
   color: green;
+  width: 40px;
+  pointer-events: none; 
 }
 
 .mil-button.error {
   color: red;
+  width: 40px;
 }
 
+.mil-button.mil-icon-button-sm.mil-arrow-place {
+  width: 40px; /* Set consistent width for all states */
+  transition: all 0.3s ease; /* Smooth transition */
+}
 
 /* No show when tablet or mobile: used on team cards */
 

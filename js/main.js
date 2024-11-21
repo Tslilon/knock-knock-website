@@ -1356,67 +1356,77 @@ document.addEventListener('DOMContentLoaded', initializeForm);
 document.addEventListener('swup:contentReplaced', initializeForm);
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Common function to initialize form handling
     function initializeForm(formSelector, inputSelector, buttonSelector, placeholderText, successPlaceholder) {
         const form = document.querySelector(formSelector);
         if (!form) {
             console.error(`Form not found: ${formSelector}`);
             return;
         }
-
+    
         const submitButton = form.querySelector(buttonSelector);
         const emailInput = form.querySelector(inputSelector);
-
+    
         if (!submitButton || !emailInput) {
             console.error(`Missing form elements for: ${formSelector}`);
             return;
         }
-
+    
         form.addEventListener('submit', function (event) {
             event.preventDefault();
-            const email = emailInput.value.trim();
-
-            if (!isValidEmail(email)) {
-                console.error('Invalid email address:', email);
-                emailInput.placeholder = 'Please enter a valid email';
+            
+            // Prevent multiple submissions
+            if (submitButton.classList.contains('success')) {
                 return;
             }
-
+    
+            const email = emailInput.value.trim();
+    
+            if (!isValidEmail(email)) {
+                console.error('Invalid email address:', email);
+                emailInput.placeholder = 'Was that an Email?';
+                return;
+            }
+    
+            // Disable input and button during submission
+            emailInput.disabled = true;
+            submitButton.disabled = true;
+    
             // Reset button state and placeholder
             submitButton.classList.remove('success', 'error');
             submitButton.innerHTML = '→';
-            emailInput.placeholder = placeholderText;
-
+    
             // Send email via AWS Lambda
             sendEmailToAWSLambda(email)
             .then(response => {
                 try {
-                    // Parse the body if it's a JSON string
                     const responseBody = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
         
                     if (responseBody.message && responseBody.message === 'Chat request sent successfully') {
                         submitButton.classList.add('success');
                         submitButton.innerHTML = '✔';
-                        emailInput.placeholder = 'Enviado';
+                        emailInput.value = ''; // Clear input
+                        emailInput.placeholder = 'See you soon!';
+                        // Keep input disabled
+                        submitButton.disabled = true;
                     } else {
-                        console.error('Unexpected response:', responseBody);
-                        submitButton.classList.add('error');
-                        submitButton.innerHTML = '✖';
-                        emailInput.placeholder = 'Error!';
+                        throw new Error('Unexpected response');
                     }
                 } catch (parseError) {
-                    console.error('Error parsing response body:', parseError);
-                    submitButton.classList.add('error');
-                    submitButton.innerHTML = '✖';
-                    emailInput.placeholder = 'Error!';
+                    handleError();
                 }
             })
             .catch(error => {
                 console.error('Error during email send:', error);
+                handleError();
+            });
+    
+            function handleError() {
                 submitButton.classList.add('error');
                 submitButton.innerHTML = '✖';
                 emailInput.placeholder = 'Error!';
-            });
+                emailInput.disabled = false;
+                submitButton.disabled = false;
+            }
         });
     }
 
